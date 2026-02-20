@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlookDash | Science Update</title>
+    <title>BlookDash | Shark Update</title>
     <style>
         :root {
             --primary: #3498db;
@@ -81,18 +81,16 @@
         .section.active { display: block; }
 
         .pack-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
         }
 
         .pack-card {
             background: var(--sidebar-bg);
-            padding: 30px;
+            padding: 25px;
             border-radius: 20px;
             text-align: center;
-            width: 250px;
             border: 2px solid #2c3e50;
             transition: 0.3s;
             cursor: pointer;
@@ -129,7 +127,7 @@
         .modal-content {
             background: #1e2530; padding: 30px; border-radius: 15px;
             text-align: center; border: 2px solid var(--primary);
-            max-width: 450px;
+            max-width: 450px; width: 90%;
         }
 
         .action-btn { padding: 12px 24px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
@@ -165,13 +163,23 @@
             <h1>Market</h1>
             <div class="pack-container">
                 <div class="pack-card" onclick="openPackMenu('roman')">
-                    <div style="font-size: 60px;">🏛️</div>
+                    <div style="font-size: 50px;">🏛️</div>
                     <h3>Roman Pack</h3>
                     <p style="color: #bdc3c7;">1,000 Tokens</p>
                 </div>
                 <div class="pack-card" onclick="openPackMenu('science')">
-                    <div style="font-size: 60px;">🧪</div>
+                    <div style="font-size: 50px;">🧪</div>
                     <h3>Science Pack</h3>
+                    <p style="color: #bdc3c7;">1,000 Tokens</p>
+                </div>
+                <div class="pack-card" onclick="openPackMenu('aquatic')">
+                    <div style="font-size: 50px;">🌊</div>
+                    <h3>Aquatic Pack</h3>
+                    <p style="color: #bdc3c7;">1,000 Tokens</p>
+                </div>
+                <div class="pack-card" onclick="openPackMenu('shark')">
+                    <div style="font-size: 50px;">🦈</div>
+                    <h3>Shark Pack</h3>
                     <p style="color: #bdc3c7;">1,000 Tokens</p>
                 </div>
             </div>
@@ -201,7 +209,7 @@
             <h2 style="color:var(--warning);">OWNER SUMMON</h2>
             <div id="summon-options" style="max-height: 300px; overflow-y: auto;"></div>
             <hr style="border:1px solid #34495e;">
-            <button id="btn-clear-inv" class="action-btn" style="background:orange; color:white; width:100%; margin-bottom:10px;">Wipe Collection (0 Tokens)</button>
+            <button id="btn-clear-inv" class="action-btn" style="background:orange; color:white; width:100%; margin-bottom:10px;">Wipe Collection</button>
             <button onclick="closeModal('ownerModal')" class="action-btn" style="background:#7f8c8d; color:white; width:100%;">Close</button>
         </div>
     </div>
@@ -228,6 +236,20 @@
                     epic: { name: 'DNA Helix', rarity: 'Epic', color: '#ff0000', img: '🧬', sell: 500 },
                     rare: { name: 'Microscope', rarity: 'Rare', color: '#0000ff', img: '🔬', sell: 200 },
                     common: { name: 'Test Tube', rarity: 'Common', color: '#00ff00', img: '🧪', sell: 100 }
+                },
+                aquatic: {
+                    chroma: { name: 'Kraken', rarity: 'Chroma', color: 'rainbow', img: '🐙', sell: 100000 },
+                    legendary: { name: 'Blue Whale', rarity: 'Legendary', color: '#ffff00', img: '🐋', sell: 10000 },
+                    epic: { name: 'Giant Squid', rarity: 'Epic', color: '#ff0000', img: '🦑', sell: 500 },
+                    rare: { name: 'Stingray', rarity: 'Rare', color: '#0000ff', img: '🐟', sell: 200 },
+                    common: { name: 'Clownfish', rarity: 'Common', color: '#00ff00', img: '🐠', sell: 100 }
+                },
+                shark: {
+                    chroma: { name: 'Megalodon', rarity: 'Chroma', color: 'rainbow', img: '🦈', sell: 100000 },
+                    legendary: { name: 'Great White Shark', rarity: 'Legendary', color: '#ffff00', img: '🦈', sell: 10000 },
+                    epic: { name: 'Hammerhead Shark', rarity: 'Epic', color: '#ff0000', img: '🔨', sell: 500 },
+                    rare: { name: 'Mako Shark', rarity: 'Rare', color: '#0000ff', img: '💨', sell: 200 },
+                    common: { name: 'Reef Shark', rarity: 'Common', color: '#00ff00', img: '🌊', sell: 100 }
                 }
             };
 
@@ -299,20 +321,11 @@
             function startOpening() {
                 if (!isOwner && tokens < 1000) return alert("No tokens!");
                 if (!isOwner) tokens -= 1000;
-                
                 const packBlooks = packs[activePack];
                 let roll = Math.random() * 100;
-                let pull;
-
-                if (roll < 1) pull = packBlooks.chroma;
-                else if (roll < 6) pull = packBlooks.legendary;
-                else if (roll < 16) pull = packBlooks.epic;
-                else if (roll < 41) pull = packBlooks.rare;
-                else pull = packBlooks.common;
-
+                let pull = (roll < 1) ? packBlooks.chroma : (roll < 6 ? packBlooks.legendary : (roll < 16 ? packBlooks.epic : (roll < 41 ? packBlooks.rare : packBlooks.common)));
                 inventory.unshift({...pull});
                 updateUI();
-
                 if (spamMode) {
                     const log = document.getElementById('spam-log');
                     log.innerHTML = `<div style="color:${pull.color === 'rainbow' ? '#ff00ff' : pull.color}">> ${pull.name}</div>` + log.innerHTML;
@@ -323,7 +336,6 @@
             }
 
             window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-
             document.getElementById('btn-market').onclick = function() { showSection('market', this); };
             document.getElementById('btn-collection').onclick = function() { showSection('collection', this); updateInventory(); };
             document.getElementById('btn-yes').onclick = startOpening;
@@ -342,6 +354,9 @@
             };
             document.getElementById('btn-owner').onclick = () => {
                 if (prompt("Auth:") === "ownerblkt") { isOwner = true; updateUI(); }
+            };
+            document.getElementById('btn-clear-inv').onclick = () => {
+                if (confirm("Delete all?")) { inventory = []; updateUI(); updateInventory(); closeModal('ownerModal'); }
             };
 
             function showSection(id, btn) {
