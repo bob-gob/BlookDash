@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Central | Play & Collect</title>
+    <style>
+        :root {
+            --primary: #3a86ff;
+            --secondary: #ffbe0b;
+            --success: #00c853;
+            --bg: #f8f9fa;
+            --owner-gold: #ffd700;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; user-select: none; }
+
+        nav {
+            background: var(--primary);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .token-display {
+            background: rgba(0,0,0,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container { display: flex; min-height: calc(100vh - 70px); }
+        .sidebar { width: 250px; background: white; border-right: 1px solid #ddd; padding: 20px; display: flex; flex-direction: column; }
+
+        .menu-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .menu-item:hover { background: #f1f3f5; }
+        .menu-item.active { background: var(--primary); color: white; }
+        
+        /* Owner Menu Item */
+        .owner-item { color: #888; font-size: 0.8em; margin-top: auto; border-top: 1px solid #eee; padding-top: 10px; }
+
+        .main-content { flex: 1; padding: 40px; }
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .reward-card {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 30px;
+        }
+
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .blook-card {
+            background: white; padding: 20px; border-radius: 15px; text-align: center; border: 2px solid #eee;
+        }
+
+        .btn-buy {
+            background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold;
+        }
+        .btn-buy:disabled { background: #ccc; }
+
+        /* Owner Specific Style */
+        .owner-mode-active { border: 3px solid var(--owner-gold) !important; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div style="font-size: 1.5em; font-weight: bold; letter-spacing: 1px;">BLOOK-DASH</div>
+        <div class="token-display">
+            <span style="color:var(--secondary)">🪙</span>
+            <span id="tokenCount">50,000</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="menu-item active" onclick="showView('home', this)">Dashboard</div>
+            <div class="menu-item" onclick="showView('market', this)">Token Market</div>
+            <div class="menu-item" onclick="showView('vault', this)">My Collection</div>
+            <div class="menu-item owner-item" onclick="checkOwnerAccess()">Owner Center</div>
+        </div>
+
+        <div class="main-content">
+            <div id="home" class="view active">
+                <div id="ownerBanner" style="display:none; background: var(--owner-gold); color: black; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px; font-weight: bold;">
+                    OWNER MODE ACTIVE: INFINITE TOKENS & FREE SHOP
+                </div>
+                <div class="reward-card">
+                    <h2>TEN-DAY STREAK BONUS</h2>
+                    <h1 style="font-size: 3.5em; margin: 10px 0;">50,000 🪙</h1>
+                    <p id="timerText">Loading Reward Timer...</p>
+                    <button id="claimBtn" style="padding:10px 20px; border-radius:20px; cursor:pointer;" onclick="claimReward()">CLAIM NOW</button>
+                </div>
+            </div>
+
+            <div id="market" class="view">
+                <h1>Token Market</h1>
+                <div class="market-grid" id="marketGrid"></div>
+            </div>
+
+            <div id="vault" class="view">
+                <h1>My Collection</h1>
+                <div class="market-grid" id="vaultGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isOwner = false;
+        let tokens = localStorage.getItem('userTokens') === null ? 50000 : parseInt(localStorage.getItem('userTokens'));
+        let ownedBlooks = JSON.parse(localStorage.getItem('ownedBlooks')) || [];
+        let lastClaim = localStorage.getItem('lastClaimDate');
+
+        const blooks = [
+            { id: 1, name: "Gold Knight", price: 5000, icon: "🛡️" },
+            { id: 2, name: "Glitch Bird", price: 15000, icon: "👾" },
+            { id: 3, name: "Cyber Wolf", price: 30000, icon: "🐺" },
+            { id: 4, name: "Galaxy Dragon", price: 100000, icon: "🌌" },
+            { id: 5, name: "Ruby Golem", price: 250000, icon: "💎" }
+        ];
+
+        function checkOwnerAccess() {
+            let attempt = prompt("Are you really the owner? Please enter the 9 digit code to prove it's you:");
+            if(attempt === "ownerblkt") {
+                isOwner = true;
+                tokens = Infinity;
+                document.getElementById('ownerBanner').style.display = 'block';
+                document.getElementById('navbar').style.background = 'var(--owner-gold)';
+                document.getElementById('navbar').style.color = 'black';
+                updateUI();
+                alert("Welcome back, Owner. God Mode activated.");
+            } else {
+                alert("Incorrect code. Access denied.");
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('tokenCount').innerText = isOwner ? "∞" : tokens.toLocaleString();
+            if(!isOwner) localStorage.setItem('userTokens', tokens);
+            localStorage.setItem('ownedBlooks', JSON.stringify(ownedBlooks));
+            checkRewardStatus();
+            renderMarket();
+            renderVault();
+        }
+
+        function checkRewardStatus() {
+            const btn = document.getElementById('claimBtn');
+            const text = document.getElementById('timerText');
+            const now = new Date().getTime();
+            const tenDays = 10 * 24 * 60 * 60 * 1000;
+
+            if (!lastClaim) {
+                text.innerText = "First claim is available!";
+                btn.disabled = false;
+            } else {
+                const nextClaim = parseInt(lastClaim) + tenDays;
+                const diff = nextClaim - now;
+                if (diff <= 0) {
+                    text.innerText = "Bonus Ready!";
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                    let d = Math.floor(diff / (1000*60*60*24));
+                    text.innerText = `Next claim in: ${d} days`;
+                }
+            }
+        }
+
+        function claimReward() {
+            if(!isOwner) tokens += 50000;
+            lastClaim = new Date().getTime();
+            localStorage.setItem('lastClaimDate', lastClaim);
+            updateUI();
+        }
+
+        function renderMarket() {
+            const grid = document.getElementById('marketGrid');
+            grid.innerHTML = '';
+            blooks.forEach(b => {
+                const isOwned = ownedBlooks.includes(b.id);
+                const priceDisplay = isOwner ? "FREE" : b.price.toLocaleString() + " Tokens";
+                const canAfford = isOwner || tokens >= b.price;
+                
+                grid.innerHTML += `
+                    <div class="blook-card ${isOwner ? 'owner-mode-active' : ''}">
+                        <div style="font-size: 50px;">${b.icon}</div>
+                        <h3>${b.name}</h3>
+                        <p>${priceDisplay}</p>
+                        <button class="btn-buy" onclick="buyBlook(${b.id}, ${b.price})" 
+                        ${(!canAfford || isOwned) && !isOwner ? 'disabled' : ''}>
+                            ${isOwned ? 'OWNED' : 'PURCHASE'}
+                        </button>
+                    </div>`;
+            });
+        }
+
+        function buyBlook(id, price) {
+            if (isOwner || tokens >= price) {
+                if(!isOwner) tokens -= price;
+                if(!ownedBlooks.includes(id)) ownedBlooks.push(id);
+                updateUI();
+            }
+        }
+
+        function renderVault() {
+            const grid = document.getElementById('vaultGrid');
+            const myItems = blooks.filter(b => ownedBlooks.includes(b.id));
+            grid.innerHTML = myItems.length ? '' : '<p>No items yet.</p>';
+            myItems.forEach(b => {
+                grid.innerHTML += `<div class="blook-card"><div style="font-size: 50px;">${b.icon}</div><h3>${b.name}</h3></div>`;
+            });
+        }
+
+        function showView(viewId, element) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
