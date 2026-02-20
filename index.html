@@ -3,218 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlookDash | Roman Empire</title>
+    <title>BlookDash | Roman Edition</title>
     <style>
+        :root {
+            --primary: #3498db;
+            --dark-bg: #0b101b;
+            --sidebar-bg: #161d2b;
+            --card-bg: #1c2331;
+            --legendary: #ffff00;
+            --epic: #ff0000;
+            --rare: #0000ff;
+            --common: #00ff00;
+        }
+
         body {
-            background-color: #0b101b;
+            background-color: var(--dark-bg);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Top Bar */
-        #top-bar {
-            width: 100%;
-            background: #161d2b;
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            border-bottom: 3px solid #3498db;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .container {
             padding: 20px;
-            text-align: center;
-            width: 100%;
-            max-width: 800px;
+            border-right: 2px solid #2c3e50;
         }
 
-        /* Buttons */
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #bdc3c7;
+            text-align: left;
+            padding: 12px;
+            font-size: 18px;
             cursor: pointer;
             border-radius: 8px;
-            border: none;
-            margin: 10px;
-            transition: 0.2s;
-            font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .pack-btn { background: #3498db; color: white; border-bottom: 4px solid #2980b9; }
-        .pack-btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .nav-btn.active { background: var(--primary); color: white; }
 
-        /* Collection Grid */
-        #collection {
+        /* Main Content */
+        #main-content { flex-grow: 1; overflow-y: auto; padding: 40px; }
+
+        .stats-bar {
+            background: var(--sidebar-bg);
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Blook Cards */
+        .blook-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-            width: 100%;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
         }
 
         .blook-card {
-            background: #1c2331;
-            padding: 15px;
-            border-radius: 12px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
             text-align: center;
             border-bottom: 6px solid gray;
-            transition: 0.3s;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .blook-card:hover { transform: translateY(-5px); }
+
+        .blook-image {
+            font-size: 50px;
+            margin-bottom: 10px;
+            display: block;
+            height: 60px;
+        }
+
+        /* Modals */
+        #confirmBox {
+            display: none; position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            z-index: 1000; justify-content: center; align-items: center;
         }
 
         .sell-btn {
             background: #e74c3c;
             color: white;
-            font-size: 11px;
-            padding: 5px;
-            margin-top: 10px;
+            border: none;
+            padding: 8px;
             width: 100%;
-            border-bottom: 2px solid #c0392b;
-        }
-
-        /* Confirmation Modal */
-        #confirmBox {
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 1000; 
-            justify-content: center; 
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #1e2530;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 3px solid #3498db;
-            box-shadow: 0 0 30px rgba(52, 152, 219, 0.4);
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div id="top-bar">
-        Tokens: <span id="token-count">50,000</span>
+    <div id="sidebar">
+        <h2 style="color: var(--primary);">BlookDash</h2>
+        <button class="nav-btn active" onclick="showSection('market', this)">🛒 Market</button>
+        <button class="nav-btn" onclick="showSection('collection', this)">🎒 Collection</button>
+        <div style="margin-top: auto;">
+            <button class="nav-btn" onclick="openOwnerPanel()" style="font-size: 10px; opacity: 0.3;">System Auth</button>
+        </div>
     </div>
 
-    <div class="container">
-        <h1>Roman Market</h1>
-        <button class="pack-btn" onclick="openConfirm()">Open Roman Pack (1,000 Tokens)</button>
-        
-        <h2 style="margin-top: 40px; border-top: 1px solid #2c3e50; padding-top: 20px;">My Collection</h2>
-        <div id="collection"></div>
+    <div id="main-content">
+        <div class="stats-bar">
+            <span>Tokens: <strong id="token-display">50,000</strong></span>
+            <span id="owner-tag" style="display:none; color:var(--legendary);">[OWNER]</span>
+        </div>
+
+        <div id="market" class="section active">
+            <h1>Roman Pack</h1>
+            <div style="background: var(--sidebar-bg); padding: 40px; border-radius: 20px; text-align: center; border: 2px solid #2c3e50;">
+                <div style="font-size: 80px; margin-bottom: 20px;">🏛️</div>
+                <button onclick="openConfirm()" style="background: var(--primary); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 20px; cursor: pointer; font-weight: bold;">
+                    Open Pack (1,000 Tokens)
+                </button>
+            </div>
+        </div>
+
+        <div id="collection" class="section">
+            <h1>Your Collection</h1>
+            <div id="collection-grid" class="blook-grid"></div>
+        </div>
     </div>
 
     <div id="confirmBox">
-        <div class="modal-content">
-            <h2 style="color:white; margin-top:0;">Open Roman Pack?</h2>
-            <p style="color:#bdc3c7;">This will cost 1,000 tokens.</p>
-            <div style="display: flex; justify-content: center;">
-                <button onclick="startOpening()" style="background:#2ecc71; color:white;">Yes, Open!</button>
-                <button onclick="closeConfirm()" style="background:#e74c3c; color:white;">No, Go Back</button>
-            </div>
+        <div style="background:#1e2530; padding:30px; border-radius:15px; text-align:center; border:2px solid var(--primary);">
+            <h2>Confirm Purchase</h2>
+            <p>Spend 1,000 tokens on a Roman Pack?</p>
+            <button onclick="startOpening()" style="background:#2ecc71; color:white; padding:10px 20px; border:none; border-radius:5px; margin:5px; cursor:pointer;">Yes, Open!</button>
+            <button onclick="closeConfirm()" style="background:#e74c3c; color:white; padding:10px 20px; border:none; border-radius:5px; margin:5px; cursor:pointer;">Cancel</button>
         </div>
     </div>
 
     <script>
-        // --- DATA SYSTEM ---
-        let userTokens = parseInt(localStorage.getItem('tokens')) || 50000;
-        let myBlooks = JSON.parse(localStorage.getItem('myBlooks')) || [];
+        let tokens = parseInt(localStorage.getItem('tokens')) || 50000;
+        let inventory = JSON.parse(localStorage.getItem('myBlooks')) || [];
+        let isOwner = false;
 
-        function saveData() {
-            localStorage.setItem('tokens', userTokens);
-            localStorage.setItem('myBlooks', JSON.stringify(myBlooks));
+        // Blook Data with "Pictures" (Emojis for now)
+        const romanBlooks = {
+            legendary: { name: 'Julius Caesar', rarity: 'Legendary', color: '#ffff00', img: '👑', sell: 10000 },
+            epic: { name: 'Gladiator', rarity: 'Epic', color: '#ff0000', img: '⚔️', sell: 500 : (roll < 40 ? 200 : 100)) },
+            rare: { name: 'Centurion', rarity: 'Rare', color: '#0000ff', img: '🛡️', sell: 200 },
+            common: { name: 'Roman Soldier', rarity: 'Common', color: '#00ff00', img: '💂', sell: 100 }
+        };
+
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+            if(id === 'collection') updateInventory();
         }
 
-        function updateDisplay() {
-            document.getElementById('token-count').innerText = userTokens.toLocaleString();
-            const collectionDiv = document.getElementById('collection');
-            collectionDiv.innerHTML = '';
+        function updateUI() {
+            document.getElementById('token-display').innerText = isOwner ? "∞" : tokens.toLocaleString();
+            localStorage.setItem('tokens', tokens);
+            localStorage.setItem('myBlooks', JSON.stringify(inventory));
+        }
 
-            myBlooks.forEach((blook, index) => {
+        function updateInventory() {
+            const grid = document.getElementById('collection-grid');
+            grid.innerHTML = '';
+            inventory.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'blook-card';
-                card.style.borderBottomColor = blook.color;
-                
-                // Sell prices based on rarity
-                let sellPrice = 100;
-                if (blook.rarity === 'Rare') sellPrice = 200;
-                if (blook.rarity === 'Epic') sellPrice = 500;
-                if (blook.rarity === 'Legendary') sellPrice = 10000;
-
+                card.style.borderBottomColor = item.color;
                 card.innerHTML = `
-                    <div style="font-weight:bold; font-size: 18px;">${blook.name}</div>
-                    <div style="font-size:12px; color:${blook.color}; font-weight:bold; margin-top:5px;">${blook.rarity.toUpperCase()}</div>
-                    <button class="sell-btn" onclick="sellBlook(${index}, ${sellPrice})">Sell for ${sellPrice}</button>
+                    <span class="blook-image">${item.img}</span>
+                    <div style="font-weight:bold; font-size:18px;">${item.name}</div>
+                    <div style="color:${item.color}; font-size:11px; font-weight:bold;">${item.rarity.toUpperCase()}</div>
+                    <button class="sell-btn" onclick="sellItem(${index}, ${item.sell})">Sell for ${item.sell}</button>
                 `;
-                collectionDiv.appendChild(card);
+                grid.appendChild(card);
             });
         }
 
-        // --- MODAL SYSTEM ---
-        function openConfirm() {
-            document.getElementById('confirmBox').style.display = 'flex';
-        }
+        function openConfirm() { document.getElementById('confirmBox').style.display = 'flex'; }
+        function closeConfirm() { document.getElementById('confirmBox').style.display = 'none'; }
 
-        function closeConfirm() {
-            document.getElementById('confirmBox').style.display = 'none';
-        }
-
-        // --- PACK OPENING SYSTEM ---
         function startOpening() {
             closeConfirm();
+            if (!isOwner && tokens < 1000) { alert("Insufficient Tokens!"); return; }
+            if (!isOwner) tokens -= 1000;
 
-            if (userTokens < 1000) {
-                alert("You don't have enough tokens to open this pack!");
-                return;
-            }
-
-            userTokens -= 1000;
             let roll = Math.random() * 100;
-            let result;
+            let pull;
+            if (roll < 5) pull = romanBlooks.legendary;
+            else if (roll < 15) pull = romanBlooks.epic;
+            else if (roll < 40) pull = romanBlooks.rare;
+            else pull = romanBlooks.common;
 
-            // Rarity Logic (Colors: Green, Blue, Red, Yellow)
-            if (roll < 5) { // 5% Chance
-                result = { name: 'Julius Caesar', rarity: 'Legendary', color: '#ffff00' };
-            } else if (roll < 15) { // 10% Chance
-                result = { name: 'Gladiator', rarity: 'Epic', color: '#ff0000' };
-            } else if (roll < 40) { // 25% Chance
-                result = { name: 'Centurion', rarity: 'Rare', color: '#0000ff' };
-            } else { // 60% Chance
-                result = { name: 'Roman Soldier', rarity: 'Common', color: '#00ff00' };
-            }
-
-            myBlooks.unshift(result);
-            saveData();
-            updateDisplay();
-
-            alert(`✨ PACK OPENED ✨\n\nYou pulled: ${result.name}!\nRarity: ${result.rarity}`);
+            inventory.unshift({...pull}); // Add a copy to inventory
+            updateUI();
+            alert(`PULL: ${pull.img} ${pull.name}!`);
         }
 
-        // --- SELLING SYSTEM ---
-        function sellBlook(index, amount) {
-            const blookName = myBlooks[index].name;
-            if (confirm(`Sell ${blookName} for ${amount} tokens?`)) {
-                userTokens += amount;
-                myBlooks.splice(index, 1);
-                saveData();
-                updateDisplay();
+        function sellItem(idx, amt) {
+            if (confirm("Sell this item?")) {
+                tokens += amt;
+                inventory.splice(idx, 1);
+                updateUI();
+                updateInventory();
             }
         }
 
-        // Initial Start
-        updateDisplay();
+        function openOwnerPanel() {
+            if (prompt("Auth Code:") === "ownerblkt") {
+                isOwner = true;
+                document.getElementById('owner-tag').style.display = 'inline';
+                updateUI();
+            }
+        }
+
+        updateUI();
     </script>
 </body>
 </html>
