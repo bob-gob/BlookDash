@@ -11,6 +11,8 @@
             --sidebar-bg: #161d2b;
             --card-bg: #1c2331;
             --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f1c40f;
         }
 
         body {
@@ -48,11 +50,25 @@
         .nav-btn {
             background: none; border: none; color: #bdc3c7;
             text-align: left; padding: 12px; font-size: 18px;
-            cursor: pointer; border-radius: 8px; margin-bottom: 5px;
+            cursor: pointer; border-radius: 8px; margin-bottom: 8px;
+            transition: 0.2s;
         }
 
+        .nav-btn:hover { background: rgba(255,255,255,0.05); color: white; }
         .nav-btn.active { background: var(--primary); color: white; }
-        .spam-toggle { color: var(--danger); font-weight: bold; border: 1px solid var(--danger); margin-top: 10px; }
+        
+        /* Styled Auth Button */
+        .auth-btn {
+            background: #2c3e50;
+            color: #95a5a6;
+            font-size: 14px;
+            border: 1px solid #34495e;
+            text-align: center;
+            margin-top: auto;
+        }
+        .auth-btn:hover { background: #34495e; color: white; }
+
+        .spam-toggle { color: var(--danger); font-weight: bold; border: 1px solid var(--danger); }
         .spam-on { background: var(--danger); color: white; }
 
         #main-content { flex-grow: 1; overflow-y: auto; padding: 40px; }
@@ -60,7 +76,7 @@
         .stats-bar {
             background: var(--sidebar-bg); padding: 15px 30px;
             border-radius: 10px; margin-bottom: 30px;
-            display: flex; justify-content: space-between;
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 3px solid var(--primary);
         }
 
@@ -107,29 +123,36 @@
             border-radius: 5px; border: none; cursor: pointer; font-weight: bold;
         }
 
-        .sell-all-btn {
+        .exit-owner-btn {
             background: var(--danger);
             color: white;
-            margin-bottom: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-left: 15px;
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div id="sidebar">
-        <h2 style="color: var(--primary);">BlookDash</h2>
+        <h2 style="color: var(--primary); margin-bottom: 25px;">BlookDash</h2>
         <button id="btn-market" class="nav-btn active">🛒 Market</button>
         <button id="btn-collection" class="nav-btn">🎒 Collection</button>
         <button id="spam-btn" class="nav-btn spam-toggle">⚡ Spam Mode: OFF</button>
-        <div style="margin-top: auto;">
-            <button id="btn-owner" class="nav-btn" style="font-size: 10px; opacity: 0.3;">System Auth</button>
-        </div>
+        
+        <button id="btn-owner" class="nav-btn auth-btn">🔑 System Auth</button>
     </div>
 
     <div id="main-content">
         <div class="stats-bar">
-            <span>Tokens: <strong id="token-display">50,000</strong></span>
-            <span id="owner-tag" style="display:none; color:yellow;">[OWNER]</span>
+            <div>
+                Tokens: <strong id="token-display">50,000</strong>
+                <button id="btn-exit-owner" class="exit-owner-btn" style="display:none;">Exit Owner Mode</button>
+            </div>
+            <span id="owner-tag" style="display:none; color:var(--warning); font-weight:bold;">[OWNER MODE ACTIVE]</span>
         </div>
 
         <div id="market" class="section active">
@@ -146,7 +169,7 @@
         <div id="collection" class="section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h1>Your Collection</h1>
-                <button id="btn-sell-all" class="action-btn sell-all-btn">Sell All Blooks</button>
+                <button id="btn-sell-all" class="action-btn" style="background:var(--danger); color:white;">Sell All Blooks</button>
             </div>
             <div id="collection-grid" class="blook-grid"></div>
         </div>
@@ -155,21 +178,21 @@
     <div id="confirmBox" class="modal">
         <div class="modal-content">
             <h2>Confirm Purchase</h2>
-            <button id="btn-yes" class="action-btn" style="background:#2ecc71; color:white; margin:5px;">Yes, Open!</button>
-            <button id="btn-no" class="action-btn" style="background:#e74c3c; color:white; margin:5px;">Cancel</button>
+            <button id="btn-yes" class="action-btn" style="background:var(--success); color:white; margin:5px;">Yes, Open!</button>
+            <button id="btn-no" class="action-btn" style="background:var(--danger); color:white; margin:5px;">Cancel</button>
         </div>
     </div>
 
     <div id="ownerModal" class="modal">
         <div class="modal-content">
-            <h2 style="color:yellow;">OWNER OVERRIDE</h2>
+            <h2 style="color:var(--warning);">OWNER OVERRIDE</h2>
             <button class="owner-choice-btn" style="background:#ff00ff;" onclick="summon('chroma')">Roman Combination (Chroma)</button>
             <button class="owner-choice-btn" style="background:#ffff00; color:black;" onclick="summon('legendary')">Julius Caesar (Legendary)</button>
             <button class="owner-choice-btn" style="background:#ff0000; color:white;" onclick="summon('epic')">Gladiator (Epic)</button>
             <button class="owner-choice-btn" style="background:#3498db; color:white;" onclick="summon('rare')">Centurion (Rare)</button>
             <button class="owner-choice-btn" style="background:#2ecc71; color:white;" onclick="summon('common')">Roman Soldier (Common)</button>
-            <hr>
-            <button id="btn-clear-inv" class="action-btn" style="background:orange; color:white; width:100%; margin-bottom:10px;">Clear Collection (No Tokens)</button>
+            <hr style="border:1px solid #34495e;">
+            <button id="btn-clear-inv" class="action-btn" style="background:orange; color:white; width:100%; margin-bottom:10px;">Clear Collection (0 Tokens)</button>
             <button class="action-btn" onclick="document.getElementById('ownerModal').style.display='none'" style="background:#7f8c8d; color:white; width:100%;">Close</button>
         </div>
     </div>
@@ -191,6 +214,8 @@
 
             function updateUI() {
                 document.getElementById('token-display').innerText = isOwner ? "∞" : tokens.toLocaleString();
+                document.getElementById('owner-tag').style.display = isOwner ? 'inline' : 'none';
+                document.getElementById('btn-exit-owner').style.display = isOwner ? 'inline' : 'none';
                 localStorage.setItem('tokens', tokens);
                 localStorage.setItem('myBlooks', JSON.stringify(inventory));
             }
@@ -209,7 +234,7 @@
                     `;
                     const sBtn = document.createElement('button');
                     sBtn.className = "action-btn";
-                    sBtn.style.cssText = "background:#e74c3c; color:white; width:100%; margin-top:10px; font-size:10px;";
+                    sBtn.style.cssText = "background:var(--danger); color:white; width:100%; margin-top:10px; font-size:10px; padding:8px;";
                     sBtn.innerText = `Sell for ${item.sell}`;
                     sBtn.onclick = () => {
                         if (confirm(`Sell ${item.name}?`)) {
@@ -224,32 +249,61 @@
                 });
             }
 
-            // --- SELL ALL FUNCTION ---
-            document.getElementById('btn-sell-all').onclick = function() {
-                if (inventory.length === 0) return alert("You have nothing to sell!");
-                
-                let totalValue = inventory.reduce((sum, item) => sum + item.sell, 0);
-                if (confirm(`Are you sure you want to sell ALL blooks for ${totalValue.toLocaleString()} tokens?`)) {
-                    tokens += totalValue;
-                    inventory = [];
-                    updateUI();
-                    updateInventory();
-                    alert(`Sold everything for ${totalValue.toLocaleString()} tokens!`);
-                }
-            };
-
             window.summon = function(type) {
                 const pull = romanBlooks[type];
                 inventory.unshift({...pull});
                 document.getElementById('ownerModal').style.display = 'none';
                 const log = document.getElementById('spam-log');
-                log.innerHTML = `<div style="color:yellow;">[SYSTEM] Summoned ${pull.name}</div>` + log.innerHTML;
+                log.innerHTML = `<div style="color:var(--warning);">[SYSTEM] Summoned ${pull.name}</div>` + log.innerHTML;
                 updateUI();
-                if (!spamMode) alert(`OWNER SUMMON: ${pull.name}`);
+            };
+
+            document.getElementById('btn-market').onclick = function() { showSection('market', this); };
+            document.getElementById('btn-collection').onclick = function() { showSection('collection', this); updateInventory(); };
+            
+            document.getElementById('spam-btn').onclick = function() {
+                spamMode = !spamMode;
+                this.innerText = spamMode ? "⚡ Spam Mode: ON" : "⚡ Spam Mode: OFF";
+                this.classList.toggle('spam-on');
+                document.getElementById('spam-log').style.display = spamMode ? 'block' : 'none';
+            };
+
+            document.getElementById('btn-sell-all').onclick = function() {
+                if (inventory.length === 0) return alert("Nothing to sell!");
+                let total = inventory.reduce((sum, item) => sum + item.sell, 0);
+                if (confirm(`Sell all for ${total.toLocaleString()} tokens?`)) {
+                    tokens += total;
+                    inventory = [];
+                    updateUI();
+                    updateInventory();
+                }
+            };
+
+            document.getElementById('btn-exit-owner').onclick = function() {
+                isOwner = false;
+                updateUI();
+                alert("Owner Mode Disabled.");
+            };
+
+            document.getElementById('btn-open-pack').onclick = function() {
+                if (isOwner) document.getElementById('ownerModal').style.display = 'flex';
+                else if(spamMode) startOpening(); 
+                else openConfirm();
+            };
+
+            document.getElementById('btn-yes').onclick = startOpening;
+            document.getElementById('btn-no').onclick = closeConfirm;
+            
+            document.getElementById('btn-owner').onclick = function() {
+                if (prompt("Auth Code:") === "ownerblkt") {
+                    isOwner = true;
+                    updateUI();
+                    alert("Owner Access: Click pack to summon Blooks.");
+                }
             };
 
             document.getElementById('btn-clear-inv').onclick = function() {
-                if (confirm("Owner: Wipe entire collection for 0 tokens?")) {
+                if (confirm("Owner Override: Delete all blooks?")) {
                     inventory = [];
                     updateUI();
                     updateInventory();
@@ -260,13 +314,10 @@
             function startOpening() {
                 if (!isOwner && tokens < 1000) { alert("No tokens!"); closeConfirm(); return; }
                 if (!isOwner) tokens -= 1000;
-
                 let roll = Math.random() * 100;
                 let pull = roll < 1 ? romanBlooks.chroma : (roll < 6 ? romanBlooks.legendary : (roll < 16 ? romanBlooks.epic : (roll < 41 ? romanBlooks.rare : romanBlooks.common)));
-                
                 inventory.unshift({...pull});
                 updateUI();
-
                 if (spamMode) {
                     const log = document.getElementById('spam-log');
                     log.innerHTML = `<div style="color:${pull.color === 'rainbow' ? '#ff00ff' : pull.color}">> Pulled ${pull.name}</div>` + log.innerHTML;
@@ -275,32 +326,6 @@
                     alert(`PULL: ${pull.name}!`);
                 }
             }
-
-            document.getElementById('btn-market').onclick = function() { showSection('market', this); };
-            document.getElementById('btn-collection').onclick = function() { showSection('collection', this); updateInventory(); };
-            document.getElementById('spam-btn').onclick = function() {
-                spamMode = !spamMode;
-                this.innerText = spamMode ? "⚡ Spam Mode: ON" : "⚡ Spam Mode: OFF";
-                this.classList.toggle('spam-on');
-                document.getElementById('spam-log').style.display = spamMode ? 'block' : 'none';
-            };
-            
-            document.getElementById('btn-open-pack').onclick = function() {
-                if (isOwner) document.getElementById('ownerModal').style.display = 'flex';
-                else if(spamMode) startOpening(); 
-                else openConfirm();
-            };
-
-            document.getElementById('btn-yes').onclick = startOpening;
-            document.getElementById('btn-no').onclick = closeConfirm;
-            document.getElementById('btn-owner').onclick = function() {
-                if (prompt("Auth Code:") === "ownerblkt") {
-                    isOwner = true;
-                    document.getElementById('owner-tag').style.display = 'inline';
-                    updateUI();
-                    alert("Owner Access Granted.");
-                }
-            };
 
             function showSection(id, btn) {
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
