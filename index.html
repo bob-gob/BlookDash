@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlookDash | Version 5.0</title>
+    <title>BlookDash | Version 6.0</title>
     <style>
         :root {
             --primary: #3498db; --dark-bg: #0b101b; --sidebar-bg: #161d2b;
@@ -52,29 +52,19 @@
         #main-content { flex-grow: 1; overflow-y: auto; padding: 40px; }
         .stats-bar { background: var(--sidebar-bg); padding: 15px 30px; border-radius: 10px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary); }
 
-        /* Layouts */
-        .creator-container { display: flex; gap: 30px; }
-        .emoji-picker { background: var(--sidebar-bg); padding: 20px; border-radius: 15px; flex: 1; height: 450px; overflow-y: auto; border: 1px solid #2c3e50; }
-        .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; }
-        .emoji-item { font-size: 24px; cursor: pointer; padding: 5px; text-align: center; }
-
-        /* Cards */
+        /* Packs */
         .pack-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .pack-card { background: var(--sidebar-bg); padding: 25px; border-radius: 20px; text-align: center; border: 2px solid #2c3e50; cursor: pointer; }
         .pack-icon { font-size: 50px; margin-bottom: 10px; }
+
+        /* Collection */
         .blook-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
         .blook-card { background: var(--card-bg); padding: 20px; border-radius: 15px; text-align: center; border-bottom: 6px solid gray; position: relative; }
         .sell-btn { position: absolute; top: 5px; right: 5px; background: var(--danger); border: none; color: white; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
 
+        /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20000; justify-content: center; align-items: center; flex-direction: column; }
         .action-btn { padding: 12px 24px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .confetti { position: absolute; width: 10px; height: 10px; z-index: 20001; animation: fall 3s linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
-
-        /* Animations */
-        @keyframes zigzag { 0% { transform: translate(-100vw, 0); } 50% { transform: translate(50vw, 0); } 100% { transform: translate(0, 0); } }
-        .anim-epic { animation: zigzag 0.8s ease-in-out; }
-        .rarity-exclusive { border: 4px solid red !important; box-shadow: 0 0 20px red; }
     </style>
 </head>
 <body onload="initLanding()">
@@ -116,52 +106,28 @@
                 <button class="nav-btn active" onclick="showSection('market', this)">🛒 Market</button>
                 <button class="nav-btn" onclick="showSection('collection', this)">🎒 Collection</button>
                 <button class="nav-btn" onclick="showSection('stats-creator', this)">📊 Stats & Creator</button>
-                <button class="nav-btn" onclick="showSection('promo-section', this)">🎟️ Promo Code</button>
                 <button class="nav-btn" style="margin-top: auto; background: #c0392b; color: white;" onclick="location.reload()">🚪 Logout</button>
-                <button class="nav-btn" style="font-size: 8px; opacity: 0.1;" onclick="activateOwner()">OWNER</button>
             </div>
 
             <div id="main-content">
                 <div class="stats-bar">
                     <div>Tokens: <strong id="token-display">0</strong></div>
-                    <button id="claim-btn" class="action-btn" style="background: var(--warning); display: none;" onclick="claimDaily()">Claim Reward (50k)!</button>
                     <span id="user-display" style="color: var(--chroma-blue); font-weight: bold;">Guest</span>
                 </div>
 
                 <div id="market" class="section">
                     <h1>Market</h1>
                     <div class="pack-container" id="pack-list"></div>
-                    <h2 style="margin-top: 50px;">Community Market</h2>
-                    <div id="community-grid" class="pack-container"></div>
-                </div>
-
-                <div id="stats-creator" class="section" style="display:none;">
-                    <h1>Blook Creator</h1>
-                    <div class="creator-container">
-                        <div style="flex:1; background: var(--sidebar-bg); padding:20px; border-radius:15px;">
-                            <input type="text" id="custom-name" class="auth-input" placeholder="Blook Name">
-                            <input type="text" id="custom-emoji" class="auth-input" placeholder="Selected Emoji" readonly>
-                            <input type="number" id="custom-price" class="auth-input" placeholder="Price (Tokens)">
-                            <button onclick="createBlook()" class="action-btn" style="background: var(--primary); width:100%;">Create & List</button>
-                        </div>
-                        <div class="emoji-picker">
-                            <input type="text" id="emoji-search" class="auth-input" placeholder="Search..." oninput="filterEmojis()">
-                            <div id="emoji-list"></div>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="collection" class="section" style="display:none;">
                     <h1>My Collection</h1>
                     <div id="collection-grid" class="blook-grid"></div>
                 </div>
-                
-                <div id="promo-section" class="section" style="display:none;">
-                    <div class="auth-container" style="margin: 0 auto;">
-                        <h1>Redeem Code</h1>
-                        <input type="text" id="promo-input" class="auth-input">
-                        <button onclick="redeem()" class="action-btn" style="background: var(--success); width:100%;">Redeem</button>
-                    </div>
+
+                <div id="stats-creator" class="section" style="display:none;">
+                    <h1>Blook Creator</h1>
+                    <p>Signup to use the creator and post on the community market!</p>
                 </div>
             </div>
         </div>
@@ -174,34 +140,24 @@
 
     <script>
         let currentUser = null;
-        let isOwner = false;
+        let userPass = null; // Stores password of current session
         let userData = { tokens: 50000n, inventory: [], lastClaim: 0 };
-        let communityBlooks = JSON.parse(localStorage.getItem('bd_community_market')) || [];
-        
-        const BIG_PRICE = 1000000000000000000000000000000000n; // 1 Decillion
-
-        const rarityInfo = {
-            'Common': { color: '#00ff00', confetti: '#2ecc71', sell: 100n },
-            'Rare': { color: '#0000ff', confetti: '#00008B', sell: 200n },
-            'Epic': { color: '#ff0000', confetti: '#e74c3c', sell: 500n },
-            'Legendary': { color: '#ffff00', confetti: '#f1c40f', sell: 10000n },
-            'Chroma': { color: 'lightblue', confetti: '#00FBFF', sell: 1000000n },
-            'Exclusive': { color: 'red', confetti: 'red', sell: 1000000000n },
-            'Custom': { color: '#9b59b6', confetti: '#8e44ad', sell: 0n }
-        };
+        const BIG_PRICE = 1000000000000000000000000000000000n;
 
         const packs = {
-            roman: { name: 'Roman Pack', icon: '🏛️', cost: 1000n, pool: [{ name: 'Mars', rarity: 'Chroma', img: '🔴' },{ name: 'Caesar', rarity: 'Legendary', img: '👑' }] },
-            science: { name: 'Science Pack', icon: '🧪', cost: 1000n, pool: [{ name: 'Atom', rarity: 'Chroma', img: '⚛️' },{ name: 'Einstein', rarity: 'Legendary', img: '🧠' }] },
-            aquatic: { name: 'Aquatic Pack', icon: '🌊', cost: 1000n, pool: [{ name: 'Kraken', rarity: 'Chroma', img: '🐙' }] },
+            roman: { name: 'Roman Pack', icon: '🏛️', cost: 1000n, pool: [{ name: 'Caesar', rarity: 'Legendary', img: '👑' }, {name: 'Soldier', rarity: 'Common', img: '💂'}] },
             shark: { name: 'Shark Pack', icon: '🦈', cost: 1000n, pool: [{ name: 'Megalodon', rarity: 'Chroma', img: '🦈' }] },
-            exclusive: { name: 'Exclusive Pack', icon: '💎', cost: BIG_PRICE, pool: [{ name: 'Jandul', rarity: 'Exclusive', img: '🤡' }], hidden: true }
+            exclusive: { name: 'Exclusive Pack', icon: '💎', cost: BIG_PRICE, pool: [{ name: 'Jandul', rarity: 'Exclusive', img: '🤡' }] }
         };
 
-        const emojiCategories = { "Animals": ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🦗","🕷","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫","🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🐐","🦌","🐕","🐩","🦮","🐈","🐓","🦃","🦚","🦜","🦢","🦩","🕊","🐇","🦝","🦨","🦡","🦦","🦥","🐁","🐀","🐿","🦔"], "Faces": ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","😎","🤓","🧐","😕","😟","🙁","☹️","😮","😯","😲","😳","🥺","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖"] };
+        const rarityInfo = {
+            'Common': { color: '#00ff00', sell: 100n },
+            'Legendary': { color: '#ffff00', sell: 10000n },
+            'Chroma': { color: 'lightblue', sell: 1000000n },
+            'Exclusive': { color: 'red', sell: 1000000000n }
+        };
 
         function initLanding() {
-            const container = document.getElementById('bg-blooks');
             const icons = ["🐶","🐙","🦈","⚛️","🔥","💎","👑"];
             for(let i=0; i<12; i++) {
                 const el = document.createElement('div');
@@ -209,51 +165,66 @@
                 el.innerText = icons[Math.floor(Math.random()*icons.length)];
                 el.style.left = Math.random()*100 + "vw";
                 el.style.top = Math.random()*100 + "vh";
-                container.appendChild(el);
+                document.getElementById('bg-blooks').appendChild(el);
             }
         }
 
         function openAuth(mode) {
-            document.getElementById('landing-screen').style.display = 'none';
+            document.getElementById('landing-screen').style.display = mode === 'landing' ? 'flex' : 'none';
             document.getElementById('login-screen').style.display = mode === 'login' ? 'flex' : 'none';
             document.getElementById('signup-screen').style.display = mode === 'signup' ? 'flex' : 'none';
-            if(mode === 'landing') document.getElementById('landing-screen').style.display = 'flex';
         }
 
         function handleSignup() {
             const u = document.getElementById('signup-user').value.trim();
-            if(!u) return;
+            const p = document.getElementById('signup-pass').value.trim();
+            if(!u || !p) return alert("Enter a username and password!");
+            if(localStorage.getItem('bd_user_' + u)) return alert("Username taken!");
+            
             currentUser = u;
+            userPass = p;
             userData = { tokens: 50000n, inventory: [], lastClaim: Date.now() };
-            saveData(); launch();
+            saveData(); 
+            launch();
         }
 
         function handleLogin() {
             const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
             const saved = localStorage.getItem('bd_user_' + u);
-            if(!saved) return alert("No user found");
+            
+            if(!saved) return alert("User not found!");
             const data = JSON.parse(saved);
+            
+            // --- THE FIX: Password Validation ---
+            if(data.password !== p) {
+                return alert("Incorrect Password!");
+            }
+            
             currentUser = u;
+            userPass = p;
             userData = { tokens: BigInt(data.tokens), inventory: data.inventory, lastClaim: data.lastClaim };
             launch();
         }
 
-        function continueAsGuest() { currentUser = "Guest"; userData = { tokens: 50000n, inventory: [], lastClaim: Date.now() }; launch(); }
+        function continueAsGuest() { currentUser = "Guest"; launch(); }
 
         function launch() {
-            document.getElementById('landing-screen').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('signup-screen').style.display = 'none';
+            document.querySelectorAll('[id$="-screen"]').forEach(s => s.style.display = 'none');
             document.getElementById('game-ui').style.display = 'block';
             document.getElementById('user-display').innerText = currentUser;
             initMarket();
-            renderEmojiGrid(""); 
             updateUI();
         }
 
         function saveData() {
             if(!currentUser || currentUser === "Guest") return;
-            const d = { tokens: userData.tokens.toString(), inventory: userData.inventory, lastClaim: userData.lastClaim };
+            const d = { 
+                password: userPass, // Save password to DB
+                tokens: userData.tokens.toString(), 
+                inventory: userData.inventory, 
+                lastClaim: userData.lastClaim 
+            };
             localStorage.setItem('bd_user_' + currentUser, JSON.stringify(d));
         }
 
@@ -262,20 +233,18 @@
             list.innerHTML = '';
             for(let key in packs) {
                 const p = packs[key];
-                if(p.hidden && !isOwner && userData.tokens < p.cost) continue;
                 const card = document.createElement('div');
                 card.className = 'pack-card';
                 card.innerHTML = `<div class="pack-icon">${p.icon}</div><h3>${p.name}</h3><p>${p.cost.toLocaleString()} Tokens</p>`;
                 card.onclick = () => openPack(key);
                 list.appendChild(card);
             }
-            renderCommunity();
         }
 
         function openPack(key) {
             const p = packs[key];
-            if(userData.tokens < p.cost && !isOwner) return alert("Not enough tokens!");
-            if(!isOwner) userData.tokens -= p.cost;
+            if(userData.tokens < p.cost) return alert("Not enough tokens!");
+            userData.tokens -= p.cost;
             const pull = p.pool[Math.floor(Math.random() * p.pool.length)];
             userData.inventory.unshift({...pull});
             saveData(); updateUI(); triggerReveal(pull);
@@ -284,69 +253,24 @@
         function triggerReveal(blook) {
             const overlay = document.getElementById('reveal-overlay');
             const container = document.getElementById('reveal-container');
-            const info = rarityInfo[blook.rarity];
             overlay.style.display = 'flex'; container.innerHTML = '';
             const card = document.createElement('div');
-            card.className = `blook-card ${blook.rarity === 'Exclusive' ? 'rarity-exclusive' : ''}`;
-            card.style.borderBottomColor = info.color;
-            card.innerHTML = `<div style="font-size:80px;">${blook.img}</div><h2>${blook.name}</h2><b style="color:${info.color}">${blook.rarity}</b>`;
+            card.className = 'blook-card';
+            card.style.borderBottomColor = rarityInfo[blook.rarity].color;
+            card.innerHTML = `<div style="font-size:80px;">${blook.img}</div><h2>${blook.name}</h2><b>${blook.rarity}</b>`;
             container.appendChild(card);
             setTimeout(() => { document.getElementById('close-reveal-btn').style.display = 'block'; }, 1000);
         }
 
-        function closeReveal() { 
-            document.getElementById('reveal-overlay').style.display = 'none'; 
-            document.getElementById('close-reveal-btn').style.display = 'none'; 
-        }
+        function closeReveal() { document.getElementById('reveal-overlay').style.display = 'none'; }
+        function updateUI() { document.getElementById('token-display').innerText = userData.tokens.toLocaleString(); }
 
-        function createBlook() {
-            const name = document.getElementById('custom-name').value;
-            const emoji = document.getElementById('custom-emoji').value;
-            const price = document.getElementById('custom-price').value;
-            if(!currentUser || currentUser === "Guest") return alert("Signup to post on market!");
-            if(!name || !emoji || !price) return alert("Missing info!");
-
-            const blook = { name, img: emoji, rarity: 'Custom', price, creator: currentUser, id: Date.now() };
-            communityBlooks.push(blook);
-            localStorage.setItem('bd_community_market', JSON.stringify(communityBlooks));
-            userData.inventory.unshift(blook);
-            saveData(); alert("Posted!");
-        }
-
-        function renderCommunity() {
-            const grid = document.getElementById('community-grid');
-            grid.innerHTML = '';
-            communityBlooks.forEach(b => {
-                const card = document.createElement('div');
-                card.className = 'pack-card';
-                card.innerHTML = `<div style="font-size:40px">${b.img}</div><h3>${b.name}</h3><p>${b.price} Tokens</p>`;
-                card.onclick = () => buyCommunity(b);
-                grid.appendChild(card);
-            });
-        }
-
-        function buyCommunity(b) {
-            const p = BigInt(b.price);
-            if(userData.tokens < p) return alert("Too expensive!");
-            userData.tokens -= p;
-            userData.inventory.unshift({...b});
-            saveData(); updateUI(); alert("Bought!");
-        }
-
-        function renderEmojiGrid(filter) {
-            const container = document.getElementById('emoji-list');
-            container.innerHTML = '';
-            for (let cat in emojiCategories) {
-                const grid = document.createElement('div');
-                grid.className = 'emoji-grid';
-                emojiCategories[cat].forEach(emoji => {
-                    const el = document.createElement('div');
-                    el.className = 'emoji-item'; el.innerText = emoji;
-                    el.onclick = () => document.getElementById('custom-emoji').value = emoji;
-                    grid.appendChild(el);
-                });
-                container.appendChild(grid);
-            }
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(id === 'collection') renderInv();
         }
 
         function renderInv() {
@@ -356,36 +280,9 @@
                 const card = document.createElement('div');
                 card.className = 'blook-card';
                 card.style.borderBottomColor = rarityInfo[item.rarity].color;
-                card.innerHTML = `<button class="sell-btn" onclick="sellOne(${i})">×</button>
-                                  <div style="font-size:40px;">${item.img}</div><b>${item.name}</b>`;
+                card.innerHTML = `<div style="font-size:40px;">${item.img}</div><b>${item.name}</b>`;
                 grid.appendChild(card);
             });
-        }
-
-        function sellOne(i) {
-            userData.tokens += rarityInfo[userData.inventory[i].rarity].sell;
-            userData.inventory.splice(i, 1);
-            saveData(); updateUI(); renderInv();
-        }
-
-        function updateUI() { 
-            document.getElementById('token-display').innerText = userData.tokens.toLocaleString(); 
-        }
-
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            document.getElementById(id).style.display = 'block';
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if(id === 'collection') renderInv();
-            if(id === 'market') initMarket();
-        }
-
-        function activateOwner() {
-            if(prompt("Password:") === 'ownerblkt') {
-                isOwner = true; userData.tokens += BIG_PRICE;
-                initMarket(); updateUI();
-            }
         }
     </script>
 </body>
